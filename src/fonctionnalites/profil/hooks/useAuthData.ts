@@ -14,7 +14,14 @@ export function useAuthData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const firebaseAuth = auth;
+    if (!firebaseAuth) {
+      setLoading(false);
+      router.push("/login");
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         const userData = await userService.getUser(currentUser.uid);
@@ -30,8 +37,8 @@ export function useAuthData() {
     });
 
     const handleBadgeSync = async () => {
-      if (auth.currentUser) {
-        const userData = await userService.getUser(auth.currentUser.uid);
+      if (firebaseAuth.currentUser) {
+        const userData = await userService.getUser(firebaseAuth.currentUser.uid);
         if (userData) {
           setProfile(userData as UserProfile);
         }
@@ -46,8 +53,14 @@ export function useAuthData() {
   }, [router]);
 
   const handleSignOut = async () => {
+    const firebaseAuth = auth;
+    if (!firebaseAuth) {
+      router.push("/");
+      return;
+    }
+
     try {
-      await signOut(auth);
+      await signOut(firebaseAuth);
       router.push("/");
     } catch (error) {
       console.error("Erreur lors de la déconnexion", error);

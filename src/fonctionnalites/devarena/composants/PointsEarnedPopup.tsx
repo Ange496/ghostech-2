@@ -67,6 +67,8 @@ export default function PointsEarnedPopup() {
   };
 
   useEffect(() => {
+    if (!auth) return;
+
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         // Listen to the user document in real-time
@@ -149,7 +151,7 @@ export default function PointsEarnedPopup() {
   }, [showPopup, earnedPoints]);
 
   const handleClose = async () => {
-    const currentUser = auth.currentUser;
+    const currentUser = auth?.currentUser;
     if (currentUser) {
       try {
         await userService.updateUser(currentUser.uid, {

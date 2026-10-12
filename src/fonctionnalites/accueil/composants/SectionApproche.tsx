@@ -23,7 +23,7 @@ export default function SectionApproche() {
         
         {/* Titre : style grand journal / magazine */}
         <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[#111111] tracking-tight leading-[1.08] text-center mb-8 sm:mb-12 md:mb-16 font-b612">
-          Qui est <span className="text-[#fd800a]">Ghostech ?</span>
+          QUI SOMME <span className="text-[#fd800a]">NOUS ?</span>
         </h2>
 
         {/* Grille Image/Média + Texte */}
@@ -32,7 +32,7 @@ export default function SectionApproche() {
           {/* Image : coins très arrondis et ombre douce */}
           <div className="w-full aspect-[4/3] rounded-[2rem] overflow-hidden relative border border-zinc-200">
             <Image
-              src="/Galeries/img_1.png"
+              src="/Galeries/imag2.jpeg"
               alt="Talent Ghostech explorant les technologies numériques"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -56,12 +56,6 @@ export default function SectionApproche() {
               Ghostech crée un environnement où les jeunes talents peuvent apprendre, collaborer, expérimenter, créer et transformer leurs compétences en projets concrets, à travers sept pôles d’expertise. Notre action repose sur trois dimensions fondamentales : développer les talents, construire des solutions et créer de l’impact. Ghostech organise formations, conférences, ateliers, hackathons, rencontres professionnelles et projets collaboratifs afin de favoriser le partage de connaissances, l’innovation et la création d’opportunités — en créant des passerelles entre talents, entreprises, institutions, établissements d’enseignement, startups et communautés technologiques.
             </p>
             
-            {/* Bouton flèche orange identique à SectionObjectifs */}
-            <div className="pt-2 sm:pt-4 flex justify-start">
-              <button className="w-12 h-12 rounded-full bg-[#fd800a] hover:brightness-95 flex items-center justify-center text-white transition-all shadow-md group">
-                <ArrowUpRight className="w-5 h-5 transition-transform group-hover:scale-110" />
-              </button>
-            </div>
           </div>
         </div>
 

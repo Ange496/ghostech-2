@@ -1,177 +1,196 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { FaCalendarAlt, FaClock, FaCheckCircle, FaLaptopCode } from "react-icons/fa";
+import { useMemo } from "react";
+import { CalendarDays, MapPin, Trophy, Users, ArrowRight } from "lucide-react";
+import { useHackathonManager } from "@/src/fonctionnalites/dashboard/hooks/useHackathonManager";
+
+type HackathonStatus = "termine" | "a_venir" | string;
+
+interface Hackathon {
+  id: string;
+  title: string;
+  theme?: string;
+  img?: string;
+  date?: string;
+  lieu?: string;
+  prizePool?: string;
+  participants?: number;
+  tags?: string[];
+  status?: HackathonStatus;
+}
+
+const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+function formatDate(raw?: string): string {
+  if (!raw) return "Date à préciser";
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return raw;
+  return dateFormatter.format(parsed);
+}
+
+function HackathonSkeleton() {
+  return (
+    <div className="animate-pulse overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="h-52 bg-gray-200" />
+      <div className="space-y-3 p-5">
+        <div className="h-5 w-3/4 rounded bg-gray-200" />
+        <div className="h-3 w-full rounded bg-gray-100" />
+        <div className="h-3 w-5/6 rounded bg-gray-100" />
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="h-3 rounded bg-gray-100" />
+          <div className="h-3 rounded bg-gray-100" />
+          <div className="h-3 rounded bg-gray-100" />
+          <div className="h-3 rounded bg-gray-100" />
+        </div>
+        <div className="h-9 w-40 rounded-xl bg-gray-200" />
+      </div>
+    </div>
+  );
+}
 
 export default function HackathonsPage() {
+  const { hackathons, isLoading } = useHackathonManager();
+
+  // Trier : à venir d'abord, puis par date décroissante
+  const sortedHackathons = useMemo<Hackathon[]>(() => {
+    return [...(hackathons as Hackathon[])].sort((a, b) => {
+      const aDone = a.status === "termine" ? 1 : 0;
+      const bDone = b.status === "termine" ? 1 : 0;
+      if (aDone !== bDone) return aDone - bDone;
+      const aTime = a.date ? new Date(a.date).getTime() : 0;
+      const bTime = b.date ? new Date(b.date).getTime() : 0;
+      return bTime - aTime;
+    });
+  }, [hackathons]);
+
   return (
-    <main className="min-h-dvh bg-white px-4 sm:px-6 lg:px-8 pb-20 pt-24 text-gray-900 font-sans antialiased">
+    <main className="min-h-dvh bg-white px-4 pb-20 pt-24 font-sans text-gray-900 antialiased sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         {/* Kicker éditorial */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-2 h-2 rounded-full bg-[#ff6500]"></span>
+        <div className="mb-3 flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-[#ff6500]" aria-hidden="true" />
           <p className="text-xs font-bold uppercase tracking-widest text-[#ff6500]">
-            Événements & Challenges Technologiques
+            Événements &amp; Challenges Technologiques
           </p>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#02073E] tracking-tight mb-8">
-          Formations Immersives & Hackathons Ghostech
+        <h1 className="mb-8 text-2xl font-extrabold tracking-tight text-[#02073E] sm:text-3xl md:text-4xl">
+          Formations Immersives &amp; Hackathons Ghostech
         </h1>
 
-        {/* Feature Event Grid */}
-        <div className="grid items-start gap-8 lg:grid-cols-12">
-          {/* Média principal */}
-          <section className="lg:col-span-7">
-            <div className="relative aspect-[4/3] sm:aspect-square w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-sm">
-              <Image
-                src="/header_photo/affiche.jpeg"
-                alt="Participants à une formation en cybersécurité"
-                fill
-                priority
-                className="object-contain"
-              />
+        <section className="mt-14" aria-live="polite" aria-busy={isLoading}>
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <HackathonSkeleton key={i} />
+              ))}
             </div>
-          </section>
-
-          {/* Fiche d'informations clés */}
-          <aside className="lg:col-span-5 bg-gray-50/80 border border-gray-100 rounded-2xl p-6 sm:p-8 space-y-5">
-            <div>
-              <span className="inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#ff6500]/10 text-[#ff6500] border border-[#ff6500]/20 mb-2">
-                Programme Certifiant
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
-                Formation Intensive en Cybersécurité
-              </h2>
-            </div>
-
-            <div className="space-y-3 border-y border-gray-200 py-4 text-xs sm:text-sm">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-gray-600 flex items-center gap-2">
-                  <FaClock className="text-[#ff6500]" /> Durée du parcours
-                </span>
-                <span className="font-bold text-gray-900">4 mois (Intensif)</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-gray-600 flex items-center gap-2">
-                  <FaCalendarAlt className="text-[#ff6500]" /> Période de recrutement
-                </span>
-                <span className="font-bold text-gray-900">24 avril — 06 mai</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-gray-600 flex items-center gap-2">
-                  <FaCheckCircle className="text-emerald-500" /> Certification
-                </span>
-                <span className="font-bold text-emerald-600">Reconnue à l'international</span>
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-2">
-              <button
-                type="button"
-                disabled
-                className="w-full bg-gray-200 py-3 rounded-xl text-xs sm:text-sm font-bold text-gray-500 cursor-not-allowed transition"
-              >
-                Candidatures closes
-              </button>
-              <p className="text-center text-[11px] text-[#ff6500] font-medium">
-                La cohorte actuelle est complète. Prochaine session bientôt disponible.
+          ) : sortedHackathons.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center">
+              <Trophy className="mx-auto mb-3 text-gray-300" size={40} aria-hidden="true" />
+              <p className="text-sm font-medium text-gray-700">
+                Aucun événement n&apos;est publié pour le moment.
               </p>
-              <Link
-                href="/formation"
-                className="w-full block text-center border border-gray-300 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-800 hover:bg-gray-100 transition"
-              >
-                Explorer nos autres programmes
-              </Link>
+              <p className="mt-1 text-xs text-gray-500">Revenez bientôt !</p>
             </div>
-          </aside>
-        </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2">
+              {sortedHackathons.map((hackathon) => {
+                const isDone = hackathon.status === "termine";
+                const statusLabel = isDone ? "Terminé" : "À venir";
 
-        {/* Section Description */}
-        <section className="mt-12 max-w-3xl space-y-4">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900">Description du programme</h2>
-          <p className="text-sm sm:text-base leading-relaxed text-gray-600">
-            Développez des compétences de pointe dans le métier d&apos;avenir de la Cybersécurité : analyse de vulnérabilités, sécurisation des réseaux, cryptographie et réponse aux incidents. Rejoignez un environnement d&apos;apprentissage immersif encadré par des professionnels chevronnés du secteur tech africain.
-          </p>
-        </section>
+                return (
+                  <article
+                    key={hackathon.id}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                  >
+                    <div className="relative h-52 bg-gray-100">
+                      {hackathon.img ? (
+                        <Image
+                          src={hackathon.img}
+                          alt={hackathon.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-gray-400">
+                          <Trophy size={40} aria-hidden="true" />
+                        </div>
+                      )}
+                      <span
+                        className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold shadow-sm ${
+                          isDone
+                            ? "bg-gray-900/85 text-white"
+                            : "bg-emerald-600 text-white"
+                        }`}
+                      >
+                        {statusLabel}
+                      </span>
+                    </div>
 
-        {/* Autres événements & Hackathons en grille responsive */}
-        <section className="mt-16 border-t border-gray-200 pt-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Événements & Challenges Associés
-            </h2>
-            <Link href="/devarena/actualites" className="text-xs sm:text-sm font-bold text-[#ff6500] hover:underline flex items-center gap-1">
-              Voir DevArena →
-            </Link>
-          </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="text-xl font-bold text-[#02073E]">
+                        {hackathon.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-600">
+                        {hackathon.theme}
+                      </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <article className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
-              <div>
-                <div className="relative aspect-video w-full bg-gray-50">
-                  <Image
-                    src="/header_photo/affiche.jpeg"
-                    alt="Affiche Formation Cybersécurité"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                    Formation
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-base font-bold text-gray-900">Session Cybersécurité 2026</h3>
-                  <p className="mt-2 text-xs leading-relaxed text-gray-500 line-clamp-2">
-                    Apprenez à sécuriser les infrastructures numériques critiques et préparez les certifications internationales.
-                  </p>
-                  <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500 font-medium">
-                    <span>Durée : 4 mois</span>
-                    <span className="text-[#ff6500] font-bold">Session Printemps</span>
-                  </div>
-                </div>
-              </div>
-              <div className="p-5 pt-0">
-                <Link
-                  href="/formation"
-                  className="w-full block text-center border border-[#ff6500] py-2 rounded-lg text-xs font-bold text-[#ff6500] hover:bg-[#ff6500] hover:text-white transition"
-                >
-                  Voir les détails
-                </Link>
-              </div>
-            </article>
+                      <div className="mt-5 grid gap-3 text-sm text-gray-600 sm:grid-cols-2">
+                        <p className="flex items-center gap-2">
+                          <CalendarDays size={16} className="shrink-0 text-[#ff6500]" aria-hidden="true" />
+                          <span>{formatDate(hackathon.date)}</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <MapPin size={16} className="shrink-0 text-[#ff6500]" aria-hidden="true" />
+                          <span>{hackathon.lieu || "En ligne / Hybride"}</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <Trophy size={16} className="shrink-0 text-[#ff6500]" aria-hidden="true" />
+                          <span>{hackathon.prizePool || "Prix à définir"}</span>
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <Users size={16} className="shrink-0 text-[#ff6500]" aria-hidden="true" />
+                          <span>{hackathon.participants ?? 0} participants max</span>
+                        </p>
+                      </div>
 
-            <article className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
-              <div>
-                <div className="relative aspect-video w-full bg-slate-900 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <FaLaptopCode className="text-4xl text-[#ff6500] mx-auto mb-2" />
-                    <span className="text-xs font-bold text-white uppercase tracking-wider">Ghostech DevDay</span>
-                  </div>
-                  <div className="absolute top-3 left-3 bg-[#ff6500] text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                    Hackathon
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-base font-bold text-gray-900">AI & Automation Challenge</h3>
-                  <p className="mt-2 text-xs leading-relaxed text-gray-500 line-clamp-2">
-                    72 heures pour concevoir un agent conversationnel et automatiser les services d'un écosystème numérique.
-                  </p>
-                  <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500 font-medium">
-                    <span>Prize : 2 500 000 FCFA</span>
-                    <span className="text-emerald-600 font-bold">À Venir</span>
-                  </div>
-                </div>
-              </div>
-              <div className="p-5 pt-0">
-                <Link
-                  href="/evenements/hackathons/2"
-                  className="w-full block text-center bg-gray-900 text-white py-2 rounded-lg text-xs font-bold hover:bg-black transition"
-                >
-                  Consulter le challenge
-                </Link>
-              </div>
-            </article>
-          </div>
+                      {hackathon.tags && hackathon.tags.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {hackathon.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="mt-auto pt-5">
+                        <Link
+                          href={`/evenements/hackathons/${hackathon.id}`}
+                          className="inline-flex items-center gap-2 rounded-xl bg-[#02073E] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#ff6500] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6500] focus-visible:ring-offset-2"
+                          aria-label={`Voir le hackathon ${hackathon.title}`}
+                        >
+                          Voir le hackathon
+                          <ArrowRight size={16} aria-hidden="true" />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
     </main>

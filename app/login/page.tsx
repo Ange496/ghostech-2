@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FirebaseError } from "firebase/app";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/src/services/firebase";
@@ -46,6 +47,13 @@ const TestimonialCard = ({ testimonial, delay }: { testimonial: Testimonial, del
   </div>
 );
 
+function getDashboardRedirectPath() {
+  const nextPath = new URLSearchParams(window.location.search).get("next");
+  return nextPath?.startsWith("/dashboard/") || nextPath === "/dashboard"
+    ? nextPath
+    : "/dashboard";
+}
+
 // --- MAIN COMPONENT ---
 
 export default function LoginPage() {
@@ -78,6 +86,11 @@ export default function LoginPage() {
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    if (!auth || !db) {
+      setError("L'authentification Firebase n'est pas configurée.");
+      return;
+    }
+
     const form = e.currentTarget;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
@@ -88,15 +101,18 @@ export default function LoginPage() {
       
       // Fetch user data to check role and redirect accordingly
       const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-      if (userDoc.exists() && userDoc.data().role === "admin") {
-        router.push('/dashboard');
+      if (userDoc.exists() && ["admin", "organisateur"].includes(userDoc.data().role)) {
+        router.push(getDashboardRedirectPath());
       } else {
         router.push('/');
       }
-    } catch (err: any) {
-      console.error("FIREBASE ERROR:", err);
+    } catch (error: unknown) {
+      console.error("FIREBASE ERROR:", error);
       let errorMessage = "Identifiants invalides ou erreur de connexion.";
-      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+      if (
+        error instanceof FirebaseError &&
+        ["auth/user-not-found", "auth/wrong-password", "auth/invalid-credential"].includes(error.code)
+      ) {
         errorMessage = "Email ou mot de passe incorrect.";
       }
       setError(errorMessage);
@@ -106,6 +122,11 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!auth || !db) {
+      setError("L'authentification Firebase n'est pas configurée.");
+      return;
+    }
+
     try {
       setLoading(true);
       const provider = new GoogleAuthProvider();
@@ -128,13 +149,13 @@ export default function LoginPage() {
       }
 
       const role = userDoc.exists() ? userDoc.data().role : "utilisateur";
-      if (role === "admin") {
-        router.push('/dashboard');
+      if (role === "admin" || role === "organisateur") {
+        router.push(getDashboardRedirectPath());
       } else {
         router.push('/');
       }
-    } catch (err: any) {
-      console.error(err);
+    } catch (error: unknown) {
+      console.error(error);
       setError("Erreur lors de la connexion avec Google.");
     } finally {
       setLoading(false);
@@ -225,8 +246,8 @@ export default function LoginPage() {
 
           {/* Slogan Text */}
           <div className="absolute top-12 left-12 right-12 z-20 text-white">
-            <h2 className="text-4xl font-b612 font-bold leading-tight mb-4 shadow-sm">Créez l'avenir avec nous.</h2>
-            <p className="text-white/80 text-lg max-w-md">Développez des solutions innovantes et participez aux projets les plus ambitieux de l'écosystème numérique africain.</p>
+            <h2 className="text-4xl font-b612 font-bold leading-tight mb-4 shadow-sm">Créez l&apos;avenir avec nous.</h2>
+            <p className="text-white/80 text-lg max-w-md">Développez des solutions innovantes et participez aux projets les plus ambitieux de l&apos;écosystème numérique africain.</p>
           </div>
 
           {/* Testimonials */}

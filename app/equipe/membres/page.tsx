@@ -11,9 +11,12 @@ export default function MembresEquipe() {
   const [activeMember, setActiveMember] = useState<any | null>(null);
 
   useEffect(() => {
+    const firestore = db;
+    if (!firestore) return;
+
     const fetchDynamicMembers = async () => {
       try {
-        const q = query(collection(db, "users"), where("role", "in", ["membre", "admin"]));
+        const q = query(collection(firestore, "users"), where("role", "in", ["membre", "admin"]));
         const querySnapshot = await getDocs(q);
         const dynamicMembers: any[] = [];
         querySnapshot.forEach((doc) => {

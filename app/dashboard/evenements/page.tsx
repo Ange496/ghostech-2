@@ -13,7 +13,7 @@ const FormationsTab = dynamic(() => import("@/src/fonctionnalites/dashboard/comp
 
 export default function EvenementsPage() {
   const [activeTab, setActiveTab] = useState<"hackathons" | "formations">("hackathons");
-  
+
   const hackManager = useHackathonManager();
   const formManager = useFormationManager();
 

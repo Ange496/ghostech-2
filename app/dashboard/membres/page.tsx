@@ -30,7 +30,9 @@ export default function MembresPage() {
       });
     } else {
       setToast({ 
-        message: `Erreur lors de la mise à jour des permissions.`, 
+        message: result.error instanceof Error
+          ? result.error.message
+          : "Erreur lors de la mise à jour des permissions.", 
         type: "error" 
       });
     }

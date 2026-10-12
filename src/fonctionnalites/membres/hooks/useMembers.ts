@@ -1,20 +1,33 @@
 import { useState, useEffect } from "react";
 import { userService } from "@/src/services/userService";
 import { UserProfile } from "@/src/types/user.types";
+import { isFirebaseConfigured } from "@/src/lib/firebase/config";
 
 export function useMembers() {
   const [members, setMembers] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(isFirebaseConfigured);
+  const [errorMsg, setErrorMsg] = useState<string | null>(
+    isFirebaseConfigured
+      ? null
+      : "Firebase n'est pas configuré. Ajoutez les variables NEXT_PUBLIC_FIREBASE_* dans .env.local puis redémarrez le serveur pour charger et gérer les membres."
+  );
 
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
     const fetchUsers = async () => {
       try {
         const usersData = await userService.getAllUsers();
         setMembers(usersData);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Erreur lors de la récupération des utilisateurs:", error);
-        setErrorMsg(error.message || "Erreur de connexion à la base de données");
+        setErrorMsg(
+          error instanceof Error
+            ? error.message
+            : "Erreur de connexion à la base de données."
+        );
       } finally {
         setLoading(false);
       }
@@ -24,6 +37,13 @@ export function useMembers() {
   }, []);
 
   const updateMember = async (userId: string, field: string, value: string) => {
+    if (!isFirebaseConfigured) {
+      return {
+        success: false,
+        error: new Error("Configurez Firebase pour modifier les membres."),
+      };
+    }
+
     try {
       await userService.updateUser(userId, {
         [field]: value

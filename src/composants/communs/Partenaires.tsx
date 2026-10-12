@@ -3,8 +3,24 @@
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
+const partenaires = [
+  { name: "Les go Creatives", src: "/partenaire/Logo-go.png" },
+  { name: "DigiFemme", src: "/partenaire/DigiFemmeCI.svg" },
+  { name: "NEDDIGI", src: "/partenaire/NEDDIGI.png" },
+  { name: "AIESEC", src: "/partenaire/AIESEC-Logo.jpg" },
+  { name: "IT-Leadher", src: "/partenaire/IT-Leadher.svg" },
+  { name: "AfroLink", src: "/partenaire/AfroLink.png" },
+  { name: "Eranove", src: "https://tse2.mm.bing.net/th/id/OIP.0i7-R5msyyOGb-mJdsDZEAHaDY?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "OIP", src: "/partenaire/OIP.webp" },
+  { name: "Centre Ivoirien de Robotique", src: "https://tse2.mm.bing.net/th/id/OIP.S94WnqrakHL3eRHHCOtdNAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "ABIDJANAISES IN TECH", src: "https://frenchtechabidjan.com/wp-content/uploads/2025/06/28.webp" },
+  { name: "IUA", src: "https://www.iuaci.org/wp-content/uploads/2025/04/WhatsApp-Image-2025-04-12-at-19.56.21.jpeg" },
+
+];
+
 export default function Partenaires() {
   const isHome = usePathname() === "/";
+  const duplicatedPartenaires = [...partenaires, ...partenaires];
 
   return (
     <section className="w-full max-w-5xl px-4 mt-12 sm:mt-20 pb-16 sm:pb-24 text-center relative z-10 mx-auto">
@@ -22,12 +38,22 @@ export default function Partenaires() {
             ? "Des passerelles entre talents, entreprises, institutions, établissements d’enseignement, startups et communautés technologiques."
             : "Ils soutiennent l'innovation et collaborent avec nous pour propulser l'écosystème tech."}
         </p>
-        <div className="w-full flex justify-center items-center">
-          <img
-            src="/partenaires/global-pater.svg"
-            alt={isHome ? "Partenaires de Ghostech et de l’innovation africaine" : "Nos partenaires impliqués"}
-            className="w-full max-w-3xl h-auto object-contain"
-          />
+        <div className="w-full overflow-hidden" aria-label="Logos des partenaires">
+          <motion.div
+            className="flex w-max"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 30, ease: "linear", repeat: Infinity }}
+          >
+            {duplicatedPartenaires.map((partenaire, index) => (
+              <div key={`${partenaire.name}-${index}`} className="w-[min(25vw,15rem)] shrink-0 px-3 md:px-4 flex items-center justify-center">
+                <img
+                  src={partenaire.src}
+                  alt={partenaire.name}
+                  className="h-20 w-auto max-w-[150px] object-contain transition duration-300"
+                />
+              </div>
+            ))}
+          </motion.div>
         </div>
       </motion.div>
     </section>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "firebase/auth";
 import { 
   Users, 
   Activity,
@@ -15,10 +16,12 @@ import {
   X,
   ChevronRight
 } from "lucide-react";
+import { auth } from "@/src/services/firebase";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
   const pathname = usePathname();
 
   useEffect(() => {
@@ -36,6 +39,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleSignOut = async () => {
+    if (!auth) return;
+    setSignOutError("");
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Unable to sign out from the dashboard:", error);
+      setSignOutError("La déconnexion a échoué. Réessayez.");
+    }
+  };
 
   interface NavItem {
     href: string;
@@ -134,10 +148,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="border-t border-white/10 p-4">
-          <button className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-stone-500 rounded-xl hover:bg-rose-500/10 hover:text-rose-400 transition-colors">
+          <button onClick={handleSignOut} className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-stone-500 rounded-xl hover:bg-rose-500/10 hover:text-rose-400 transition-colors">
             <LogOut size={20} />
             Déconnexion
           </button>
+          {signOutError && <p className="mt-2 px-4 text-xs text-rose-400" role="alert">{signOutError}</p>}
         </div>
       </motion.aside>
 

@@ -2,7 +2,25 @@
 
 import { useState, useEffect } from "react";
 
-const DEFAULT_HACKATHONS = [
+interface HackathonItem {
+  id: number | string;
+  title: string;
+  status: "a-venir" | "termine";
+  statusLabel: string;
+  statusColor: string;
+  date: string;
+  prizePool: string;
+  participants: number | string;
+  theme: string;
+  tags: string[];
+  img: string;
+  cardStyle: string;
+  titleColor: string;
+  textColor: string;
+  lieu?: string;
+}
+
+const DEFAULT_HACKATHONS: HackathonItem[] = [
   {
     id: 2,
     title: "AI & Automation Hackathon",
@@ -49,7 +67,7 @@ import { isFirebaseConfigured } from "@/src/lib/firebase/config";
 import * as hackathonService from "@/src/lib/firebase/services/hackathons";
 
 export function useHackathonManager() {
-  const [hackathons, setHackathons] = useState<any[]>([]);
+  const [hackathons, setHackathons] = useState<HackathonItem[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | string | null>(null);
   const [form, setForm] = useState<HackathonFormState>(EMPTY_HACK_FORM);
@@ -59,17 +77,18 @@ export function useHackathonManager() {
   useEffect(() => {
     if (isFirebaseConfigured) {
       const unsubscribe = hackathonService.subscribeToHackathons((data) => {
-        const formattedData = data.map(h => ({
+        const formattedData = data.map<HackathonItem>(h => ({
           id: h.id,
           title: h.title,
-          status: h.status,
+          status: h.status === "termine" ? "termine" : "a-venir",
           statusLabel: h.status === "a-venir" ? "À Venir" : "Terminé",
           statusColor: h.status === "a-venir" ? "bg-blue-500/10 text-blue-500 border-blue-200" : "bg-slate-500/10 text-slate-500 border-slate-200",
           date: h.startDate,
           prizePool: h.totalPrize,
           participants: h.participantsCount,
           theme: h.theme,
-          tags: ["Tech"], // You can add tags to Firebase model if needed
+          tags: h.tags || ["Tech"],
+          lieu: h.location || "En ligne / Hybride",
           img: h.image || "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=600",
           cardStyle: "bg-white border-slate-200 shadow-md",
           titleColor: "text-slate-900",
@@ -83,6 +102,8 @@ export function useHackathonManager() {
       const stored = localStorage.getItem("local_hackathons");
       if (stored) {
         try {
+          // Local storage can only be read after hydration in the browser.
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setHackathons(JSON.parse(stored));
         } catch (e) {
           console.error("Failed to parse hackathons", e);
@@ -105,7 +126,7 @@ export function useHackathonManager() {
     setShowModal(true);
   };
 
-  const openEdit = (hack: any) => {
+  const openEdit = (hack: HackathonItem) => {
     setEditingId(hack.id);
     setForm({
       title: hack.title,
@@ -141,7 +162,9 @@ export function useHackathonManager() {
         endDate: form.date,
         participantsCount: form.participants,
         totalPrize: form.prize,
-        image: form.image
+        image: form.image,
+        tags: form.tags ? form.tags.split(",").map((tag) => tag.trim()).filter(Boolean) : ["Tech"],
+        location: form.lieu || "En ligne / Hybride",
       };
 
       if (editingId !== null && typeof editingId === 'string') {
@@ -150,7 +173,7 @@ export function useHackathonManager() {
         await hackathonService.addHackathon(fbData);
       }
     } else {
-      let updated: any[];
+      let updated: HackathonItem[];
       if (editingId !== null) {
         updated = hackathons.map((h) =>
           h.id === editingId

@@ -1,6 +1,9 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
+import type { FirebaseApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import type { Auth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import type { Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,8 +14,31 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase only if it hasn't been initialized already
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+export const isFirebaseConfigured = Object.values(firebaseConfig).every(
+  (value) => typeof value === "string" && value.length > 0
+);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const app: FirebaseApp | null = isFirebaseConfigured
+  ? getApps().length
+    ? getApp()
+    : initializeApp(firebaseConfig)
+  : null;
+
+export const auth: Auth | null = app ? getAuth(app) : null;
+export const db: Firestore | null = app ? getFirestore(app) : null;
+
+export function requireFirebaseAuth(): Auth {
+  if (!auth) {
+    throw new Error("Firebase Auth is not configured. Set the NEXT_PUBLIC_FIREBASE_* variables.");
+  }
+
+  return auth;
+}
+
+export function requireFirebaseDb(): Firestore {
+  if (!db) {
+    throw new Error("Firebase Firestore is not configured. Set the NEXT_PUBLIC_FIREBASE_* variables.");
+  }
+
+  return db;
+}

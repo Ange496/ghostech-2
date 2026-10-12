@@ -38,10 +38,14 @@ service cloud.firestore {
       // Tout le monde (même non connecté) peut voir les profils (utile pour le classement)
       allow read: if true;
       
-      // Seul le propriétaire peut créer ou modifier son profil.
-      // Exception: un admin peut modifier le profil d'un autre (ex: pour donner un badge)
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdminOrJury();
+      // Un utilisateur peut créer son profil, mais pas s'attribuer un rôle privilégié.
+      allow create: if isOwner(userId) &&
+        (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'utilisateur');
+      
+      // Les utilisateurs et jurys ne peuvent pas modifier les rôles; les administrateurs le peuvent.
+      allow update: if isStrictAdmin() ||
+        ((isOwner(userId) || isAdminOrJury()) &&
+          request.resource.data.role == resource.data.role);
       allow delete: if isStrictAdmin();
     }
 

@@ -15,16 +15,16 @@ export default function BadgeUnlockPopup() {
   const [queue, setQueue] = useState<GameBadge[]>([]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = auth ? onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         checkNewBadges(currentUser.uid);
       }
-    });
+    }) : undefined;
 
     // Listen for arena sync events
     const handleSync = () => {
-      if (auth.currentUser) {
+      if (auth?.currentUser) {
         checkNewBadges(auth.currentUser.uid);
       }
     };
@@ -32,7 +32,7 @@ export default function BadgeUnlockPopup() {
     window.addEventListener("arena_sync", handleSync);
 
     return () => {
-      unsubscribe();
+      unsubscribe?.();
       window.removeEventListener("arena_sync", handleSync);
     };
   }, []);

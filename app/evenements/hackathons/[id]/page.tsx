@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, use } from "react";
+import { use } from "react";
 import Link from "next/link";
 import { FaArrowLeft, FaCalendarAlt, FaMapPin, FaTrophy, FaUsers, FaExclamationTriangle } from "react-icons/fa";
+import { useHackathonManager } from "@/src/fonctionnalites/dashboard/hooks/useHackathonManager";
 
 interface Hackathon {
-  id: number;
+  id: number | string;
   title: string;
   status: "a-venir" | "termine";
   statusLabel: string;
@@ -22,56 +23,14 @@ interface Hackathon {
   lieu?: string;
 }
 
-const DEFAULT_HACKATHONS: Hackathon[] = [
-  {
-    id: 2,
-    title: "AI & Automation Hackathon",
-    status: "a-venir",
-    statusLabel: "À Venir",
-    statusColor: "bg-[#42C89A]/10 border-[#42C89A] text-[#42C89A]",
-    date: "15 - 17 Mai 2026",
-    prizePool: "2 500 000 FCFA",
-    participants: 120,
-    theme: "Concevoir un agent conversationnel intelligent capable d'automatiser le support client.",
-    tags: ["Python", "Watsonx", "LLM"],
-    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600",
-    cardStyle: "bg-white border-slate-200 shadow-md",
-    titleColor: "text-slate-900",
-    textColor: "text-slate-600",
-    lieu: "En ligne / Hybride"
-  }
-];
-
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
 export default function HackathonDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
-  const hackId = parseInt(resolvedParams.id, 10);
-
-  const [hack, setHack] = useState<Hackathon | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("local_hackathons");
-    let list: Hackathon[] = [];
-    if (stored) {
-      try {
-        list = JSON.parse(stored);
-      } catch (e) {
-        console.error("Failed to parse hackathons from localStorage", e);
-        list = DEFAULT_HACKATHONS;
-      }
-    } else {
-      list = DEFAULT_HACKATHONS;
-      localStorage.setItem("local_hackathons", JSON.stringify(DEFAULT_HACKATHONS));
-    }
-
-    const found = list.find((h) => h.id === hackId);
-    setHack(found || null);
-    setLoading(false);
-  }, [hackId]);
+  const { hackathons, isLoading: loading } = useHackathonManager();
+  const hack = hackathons.find((item) => String(item.id) === resolvedParams.id) as Hackathon | undefined;
 
   if (loading) {
     return (
@@ -88,7 +47,7 @@ export default function HackathonDetailPage({ params }: PageProps) {
           <FaExclamationTriangle className="text-amber-500 text-5xl mx-auto mb-4" />
           <h2 className="text-xl font-bold text-slate-900 mb-2">Hackathon introuvable</h2>
           <p className="text-slate-500 text-sm mb-6">
-            Désolé, le hackathon que vous recherchez n'existe pas ou a été retiré.
+            Désolé, le hackathon que vous recherchez n&apos;existe pas ou a été retiré.
           </p>
           <Link
             href="/evenements/hackathons"
@@ -167,7 +126,7 @@ export default function HackathonDetailPage({ params }: PageProps) {
 
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-xs">
               <h2 className="text-lg font-bold text-slate-900 border-b border-slate-50 pb-3 mb-4">
-                Organisation de l'événement
+                Organisation de l&apos;événement
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-start gap-3">

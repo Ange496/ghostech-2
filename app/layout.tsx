@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { DM_Sans, B612, Roboto, Geist } from "next/font/google";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import ConditionalLayout from "@/src/composants/mise-en-page/ConditionalLayout";
 import { cn } from "@/src/utilitaires/cn";

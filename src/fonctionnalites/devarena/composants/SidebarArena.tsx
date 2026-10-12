@@ -47,6 +47,8 @@ export function AppSidebar() {
   const [user, setUser] = useState(DEFAULT_USER);
 
   useEffect(() => {
+    if (!auth) return;
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         // First set basic info from auth
@@ -88,6 +90,12 @@ export function AppSidebar() {
   }, []);
 
   const handleLogout = async () => {
+    if (!auth) {
+      localStorage.removeItem("ghostech_user");
+      router.push("/login");
+      return;
+    }
+
     try {
       await signOut(auth);
       localStorage.removeItem("ghostech_user");

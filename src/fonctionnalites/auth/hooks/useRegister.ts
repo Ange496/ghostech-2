@@ -12,6 +12,11 @@ export function useRegister() {
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    if (!auth) {
+      setError("L'authentification Firebase n'est pas configurée.");
+      return;
+    }
+
     const form = e.currentTarget;
     const name = (form.elements.namedItem('name') as HTMLInputElement).value;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
@@ -48,6 +53,11 @@ export function useRegister() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!auth) {
+      setError("L'authentification Firebase n'est pas configurée.");
+      return;
+    }
+
     try {
       setLoading(true);
       const provider = new GoogleAuthProvider();

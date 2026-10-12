@@ -1,8 +1,13 @@
+
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { OBJECTIFS } from "@/src/fonctionnalites/accueil/donnees/objectifs";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface SectionObjectifsProps {
   scrollY: number;
@@ -13,125 +18,335 @@ const CARTE_SUPPLÉMENTAIRE = {
   desc: "Innovation, impact, collaboration, apprentissage, excellence et engagement africain guident notre action.",
 };
 
-export default function SectionObjectifs({ scrollY }: SectionObjectifsProps) {
+const INTERVALLE_DEFILEMENT = 3200;
+
+export default function SectionObjectifs({
+  scrollY,
+}: SectionObjectifsProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pauseRef = useRef(false);
 
-  const scrollCards = (direction: -1 | 1) => {
-    const carousel = carouselRef.current;
-    const firstCard = carousel?.firstElementChild;
-
-    if (!carousel || !(firstCard instanceof HTMLElement)) return;
-
-    const gap = Number.parseFloat(window.getComputedStyle(carousel).columnGap) || 0;
-    carousel.scrollBy({
-      left: direction * (firstCard.getBoundingClientRect().width + gap),
-      behavior: "smooth",
-    });
-  };
+  const [isPaused, setIsPaused] = useState(false);
 
   const toutesLesCartes = [...OBJECTIFS, CARTE_SUPPLÉMENTAIRE];
 
+  const scrollCards = useCallback((direction: -1 | 1) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const firstCard = carousel.querySelector<HTMLElement>(
+      "[data-objectif-card]"
+    );
+
+    if (!firstCard) return;
+
+    const styles = window.getComputedStyle(carousel);
+    const gap = Number.parseFloat(styles.columnGap) || 0;
+    const distance = firstCard.getBoundingClientRect().width + gap;
+
+    const maxScroll =
+      carousel.scrollWidth - carousel.clientWidth;
+
+    if (direction === 1 && carousel.scrollLeft >= maxScroll - 8) {
+      carousel.scrollTo({ left: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (direction === -1 && carousel.scrollLeft <= 8) {
+      carousel.scrollTo({ left: maxScroll, behavior: "smooth" });
+      return;
+    }
+
+    carousel.scrollBy({
+      left: direction * distance,
+      behavior: "smooth",
+    });
+  }, []);
+
+  const pauseAutoplay = () => {
+    pauseRef.current = true;
+    setIsPaused(true);
+  };
+
+  const resumeAutoplay = () => {
+    pauseRef.current = false;
+    setIsPaused(false);
+  };
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const mediaQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+
+    const startAutoplay = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+
+      if (mediaQuery.matches) return;
+
+      intervalRef.current = setInterval(() => {
+        if (pauseRef.current) return;
+
+        const firstCard =
+          carousel.querySelector<HTMLElement>(
+            "[data-objectif-card]"
+          );
+
+        if (!firstCard) return;
+
+        const gap =
+          Number.parseFloat(
+            window.getComputedStyle(carousel).columnGap
+          ) || 0;
+
+        const distance =
+          firstCard.getBoundingClientRect().width + gap;
+
+        const maxScroll =
+          carousel.scrollWidth - carousel.clientWidth;
+
+        if (carousel.scrollLeft >= maxScroll - 8) {
+          carousel.scrollTo({
+            left: 0,
+            behavior: "smooth",
+          });
+        } else {
+          carousel.scrollBy({
+            left: distance,
+            behavior: "smooth",
+          });
+        }
+      }, INTERVALLE_DEFILEMENT);
+    };
+
+    startAutoplay();
+    mediaQuery.addEventListener("change", startAutoplay);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      mediaQuery.removeEventListener("change", startAutoplay);
+    };
+  }, []);
+
   return (
-    <div className="w-full bg-white flex flex-col items-center relative overflow-hidden pt-0 pb-20">
-      
+    <section
+      aria-labelledby="objectifs-heading"
+      className="relative isolate w-full overflow-hidden bg-white py-16 sm:py-20 lg:py-24"
+    >
+      {/* Décoration d'arrière-plan */}
       <div
-        className="absolute inset-0 pointer-events-none select-none z-0 opacity-5"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          transform: `translateY(${scrollY * 0.08}px)`,
-          background: "radial-gradient(circle at 80% 20%, #fd800a 0%, transparent 60%)",
+          transform: `translateY(${scrollY * 0.04}px)`,
+          background:
+            "radial-gradient(ellipse at 85% 15%, rgba(253,128,10,0.09), transparent 48%)",
         }}
       />
 
-      <section className="w-full relative z-10 flex flex-col gap-12">
-        
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-4 md:px-8 max-w-7xl mx-auto w-full">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#111111] tracking-tight leading-[1.05] max-w-3xl font-b612">
-            Vision, <span className="text-[#fd800a]">mission</span>&nbsp;&amp; objectif
-          </h2>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 sm:gap-12">
+        {/* En-tête */}
+        <div className="flex flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+          <div className="max-w-3xl">
 
-          <div className="flex flex-col items-end gap-3">
-            <span className="block w-full max-w-[360px] text-[10px] sm:text-[11px] md:text-xs text-zinc-400 font-medium tracking-wide text-right">
-              Développer les talents, construire des solutions,
-              <br />
-              créer de l’impact.
-            </span>
-            <div className="flex items-center gap-2">
-              <button 
-                aria-label="Précédent"
+            <h2
+              id="objectifs-heading"
+              className="font-b612 text-3xl font-black leading-[1.08] tracking-tight text-[#111111] sm:text-4xl md:text-5xl lg:text-6xl"
+            >
+              Vision, mission & <span className="text-[#fd800a]">
+                objectifs
+              </span>
+
+            </h2>
+
+            <p className="mt-5 max-w-xl text-sm leading-7 text-zinc-600 sm:text-base">
+              Développer les talents, stimuler l'innovation et
+              accompagner la création de solutions technologiques
+              à fort impact pour l'Afrique.
+            </p>
+          </div>
+
+          {/* Navigation du carrousel */}
+          <div className="flex items-center justify-between gap-5 lg:justify-end">
+        
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                aria-label="Afficher le pilier précédent"
                 onClick={() => scrollCards(-1)}
-                className="w-12 h-12 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center text-zinc-800 transition-colors shadow-sm"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-800 shadow-sm transition duration-200 hover:border-[#fd800a] hover:text-[#fd800a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fd800a] sm:h-12 sm:w-12"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft size={21} />
               </button>
-              <button 
-                aria-label="Suivant"
+
+              <button
+                type="button"
+                aria-label="Afficher le pilier suivant"
                 onClick={() => scrollCards(1)}
-                className="w-12 h-12 rounded-full bg-[#fd800a] hover:brightness-95 flex items-center justify-center text-white transition-all shadow-md"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-[#fd800a] text-white shadow-md shadow-orange-200/60 transition duration-200 hover:-translate-y-0.5 hover:bg-[#e97000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fd800a] focus-visible:ring-offset-2 sm:h-12 sm:w-12"
               >
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <ChevronRight className="w-5 h-5 text-white" />
-                </div>
+                <ChevronRight size={21} />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-4">
+        {/* Carrousel */}
+        <div
+          className="relative"
+          onMouseEnter={pauseAutoplay}
+          onMouseLeave={resumeAutoplay}
+          onFocusCapture={pauseAutoplay}
+          onBlurCapture={(event) => {
+            if (
+              !event.currentTarget.contains(event.relatedTarget as Node)
+            ) {
+              resumeAutoplay();
+            }
+          }}
+          onTouchStart={pauseAutoplay}
+          onTouchEnd={() => {
+            window.setTimeout(resumeAutoplay, 1800);
+          }}
+        >
           <div
             ref={carouselRef}
-            className="flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 pt-2 pl-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="region"
+            aria-label="Les piliers de Ghostech"
+            aria-roledescription="carrousel"
+            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-5 pt-2 sm:gap-5 sm:px-6 lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-          {toutesLesCartes.map((obj, i) => {
-            const isOrange = i === 0;
-            const isDark = i === 2;
+            {toutesLesCartes.map((obj, index) => {
+              const isOrange = index === 0;
+              const isDark = index === 2;
 
-            return (
-              <div 
-                key={i} 
-                className={`w-[82vw] sm:w-[320px] md:w-[340px] lg:w-[350px] flex-none snap-start rounded-[2rem] p-6 flex flex-col justify-between min-h-[290px] transition-all duration-300 shadow-lg hover:shadow-xl relative group cursor-pointer ${
-                  isOrange 
-                    ? "bg-gradient-to-br from-[#fd800a] to-[#e06c00] text-white" 
-                    : isDark 
-                    ? "bg-[#111111] text-white" 
-                    : "bg-white text-zinc-900 border border-zinc-200"
-                }`}
-              >
-                <div className="flex flex-col gap-2">
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${isOrange || isDark ? "text-white/70" : "text-[#fd800a]"}`}>
-                    Pilier 0{i + 1}
-                  </span>
-                  <h3 className={`text-xl font-extrabold tracking-tight leading-snug ${isOrange || isDark ? "text-white" : "text-zinc-900"}`}>
-                    {obj.title}
-                  </h3>
-                </div>
+              const cardStyle = isOrange
+                ? "bg-gradient-to-br from-[#fd800a] to-[#df6900] text-white border-transparent"
+                : isDark
+                  ? "bg-[#111111] text-white border-[#222222]"
+                  : "border-zinc-200 bg-white text-[#111111]";
 
-                <div className="flex flex-col gap-4">
-                  <p className={`text-xs sm:text-[13px] leading-relaxed line-clamp-3 ${isOrange || isDark ? "text-white/85" : "text-zinc-600"}`}>
-                    {obj.desc}
-                  </p>
+              return (
+                <article
+                  key={obj.title}
+                  data-objectif-card
+                  aria-label={`${obj.title}, pilier ${index + 1}`}
+                  className={`group relative flex min-h-[300px] w-[84vw] max-w-[360px] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl border p-6 shadow-[0_8px_30px_rgba(0,0,0,0.045)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)] sm:min-h-[320px] sm:w-[320px] sm:p-7 lg:w-[340px] ${cardStyle}`}
+                >
+                  {/* Élément graphique décoratif */}
+                  <div
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full border-[22px] transition duration-500 group-hover:scale-125 ${
+                      isOrange
+                        ? "border-white/10"
+                        : isDark
+                          ? "border-white/[0.04]"
+                          : "border-orange-50"
+                    }`}
+                  />
 
-                  <div className={`flex items-center justify-between pt-3 border-t ${isOrange || isDark ? "border-white/15" : "border-zinc-100"}`}>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${isOrange || isDark ? "text-white/90" : "text-zinc-800"}`}>
-                      Identité globale
-                    </span>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
-                      isOrange 
-                        ? "bg-white text-[#fd800a]" 
-                        : isDark 
-                        ? "bg-white text-zinc-900" 
-                        : "bg-zinc-900 text-white"
-                    }`}>
-                      <ArrowUpRight className="w-4 h-4" />
+                  <div className="relative flex flex-col gap-5">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${
+                          isOrange || isDark
+                            ? "text-white/65"
+                            : "text-[#fd800a]"
+                        }`}
+                      >
+                        Pilier {String(index + 1).padStart(2, "0")}
+                      </span>
+
+                      <span
+                        className={`text-3xl font-black ${
+                          isOrange || isDark
+                            ? "text-white/[0.12]"
+                            : "text-orange-100"
+                        }`}
+                      >
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    <h3 className="max-w-[260px] text-2xl font-extrabold leading-tight tracking-tight sm:text-[26px]">
+                      {obj.title}
+                    </h3>
+                  </div>
+
+                  <div className="relative mt-8">
+                    <p
+                      className={`text-sm leading-7 ${
+                        isOrange || isDark
+                          ? "text-white/80"
+                          : "text-zinc-600"
+                      }`}
+                    >
+                      {obj.desc}
+                    </p>
+
+                    <div
+                      className={`mt-6 flex items-center justify-between border-t pt-4 ${
+                        isOrange || isDark
+                          ? "border-white/15"
+                          : "border-zinc-100"
+                      }`}
+                    >
+                      <span
+                        className={`text-[9px] font-bold uppercase tracking-[0.16em] sm:text-[10px] ${
+                          isOrange || isDark
+                            ? "text-white/75"
+                            : "text-zinc-500"
+                        }`}
+                      >
+                        Construire l'impact
+                      </span>
+
+                      <span
+                        aria-hidden="true"
+                        className={`flex h-10 w-10 items-center justify-center rounded-full transition duration-300 group-hover:rotate-45 ${
+                          isOrange
+                            ? "bg-white text-[#fd800a]"
+                            : isDark
+                              ? "bg-white text-[#111111]"
+                              : "bg-[#111111] text-white"
+                        }`}
+                      >
+                        <ArrowUpRight size={19} />
+                      </span>
                     </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
+                </article>
+              );
+            })}
           </div>
         </div>
 
-      </section>
-    </div>
+        {/* Indicateur de lecture */}
+        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        
+
+          <div
+            className={`h-1 w-16 overflow-hidden rounded-full bg-orange-100 sm:w-24 ${
+              isPaused ? "opacity-50" : ""
+            }`}
+          >
+            <div
+              className={`h-full rounded-full bg-[#fd800a] ${
+                isPaused ? "w-1/3" : "w-full"
+              }`}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
