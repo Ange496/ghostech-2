@@ -10,12 +10,13 @@ import {
   FaLinkedinIn,
   FaTiktok,
   FaWhatsapp,
-  FaFacebookF,
 } from "react-icons/fa";
 import {
   FiHome,
   FiCalendar,
+  FiBookOpen,
   FiGrid,
+  FiTrendingUp,
   FiMail,
   FiUserPlus,
   FiUser,
@@ -42,7 +43,7 @@ const NAV_LINKS = [
   {
     label: "Formations",
     href: "/formation",
-    icon: FiCalendar,
+    icon: FiBookOpen,
     prefix: "/formation",
   },
   {
@@ -54,7 +55,7 @@ const NAV_LINKS = [
   {
     label: "Impact",
     href: "/projets/impact",
-    icon: FiGrid,
+    icon: FiTrendingUp,
     prefix: "/projets",
   },
   {
@@ -89,12 +90,6 @@ const SOCIAL_LINKS = [
     href: "https://chat.whatsapp.com/Le6R6EvCKOR8I3kmQEd9XS",
     icon: FaWhatsapp,
     hover: "hover:text-[#25D366]",
-  },
-  {
-    label: "Facebook",
-    href: "https://facebook.com",
-    icon: FaFacebookF,
-    hover: "hover:text-[#1877F2]",
   },
 ];
 

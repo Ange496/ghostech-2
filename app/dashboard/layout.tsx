@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { 
   Users, 
-  Activity,
+  CalendarDays,
   LayoutDashboard,
   LogOut, 
   Bell, 
@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems: NavItem[] = [
     { href: "/dashboard", icon: <LayoutDashboard size={20} />, label: "Vue d'ensemble" },
     { href: "/dashboard/membres", icon: <Users size={20} />, label: "Membres" },
-    { href: "/dashboard/evenements", icon: <Activity size={20} />, label: "Événements" }
+    { href: "/dashboard/evenements", icon: <CalendarDays size={20} />, label: "Événements" }
   ];
 
   return (

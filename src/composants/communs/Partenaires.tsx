@@ -40,12 +40,12 @@ export default function Partenaires() {
         </p>
         <div className="w-full overflow-hidden" aria-label="Logos des partenaires">
           <motion.div
-            className="flex w-max"
+            className="flex w-max gap-6 md:gap-0"
             animate={{ x: ["0%", "-50%"] }}
             transition={{ duration: 30, ease: "linear", repeat: Infinity }}
           >
             {duplicatedPartenaires.map((partenaire, index) => (
-              <div key={`${partenaire.name}-${index}`} className="w-[min(25vw,15rem)] shrink-0 px-3 md:px-4 flex items-center justify-center">
+              <div key={`${partenaire.name}-${index}`} className="w-[min(38vw,15rem)] shrink-0 px-2 md:w-[min(25vw,15rem)] md:px-4 flex items-center justify-center">
                 <img
                   src={partenaire.src}
                   alt={partenaire.name}
