@@ -2,8 +2,10 @@
 
 import { useState, FormEvent } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, User, Briefcase, Heart, ClipboardCheck, ExternalLink } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 
 export default function RejoindreEquipe() {
+  const reducedMotion = useReducedMotion();
   const [step, setStep] = useState(1);
   const totalSteps = 4;
   const [submitted, setSubmitted] = useState(false);
@@ -63,28 +65,28 @@ export default function RejoindreEquipe() {
   const SLOGAN = "Innovation, impact, collaboration, apprentissage, excellence, engagement africain : ce sont nos valeurs.";
 
   return (
-    <main className="w-full min-h-dvh bg-[#FAFAFA] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-3xl mx-auto">
+    <main className="relative isolate min-h-dvh w-full overflow-hidden bg-[#F6F8FB] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <div aria-hidden="true" className="pointer-events-none absolute -right-32 top-0 -z-10 h-96 w-96 rounded-full bg-[#fd800a]/10 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 -left-24 -z-10 h-96 w-96 rounded-full bg-sky-100/70 blur-3xl" />
+      <div className="mx-auto w-full max-w-4xl">
 
         {/* En-tête avec slogan */}
-        <div className="mb-10 text-center">
-          <div className="flex items-center justify-center gap-3 mb-5">
-            <span className="h-px w-8 bg-[#fd800a]" />
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#fd800a]">
-              Ghostech · Communauté
-            </p>
-            <span className="h-px w-8 bg-[#fd800a]" />
-          </div>
-          <h1 className="font-b612 text-4xl sm:text-5xl font-black text-[#111111] tracking-tight mb-4">
-            Rejoindre l'équipe
+        <motion.div
+          initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.55 }}
+          className="mb-10 text-center sm:mb-12"
+        >
+          <h1 className="font-b612 mb-4 text-4xl font-black tracking-tight text-[#111827] sm:text-5xl lg:text-6xl">
+            Rejoindre <span className="text-[#fd800a]">l&apos;équipe</span>
           </h1>
-          <p className="text-zinc-500 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
             {SLOGAN}
           </p>
-        </div>
+        </motion.div>
 
         {/* Stepper horizontal avec icônes */}
-        <div className="flex items-center justify-between mb-8 sm:mb-10 px-1">
+        <div className="mb-8 flex items-center justify-between px-1 sm:mb-10">
           {[1, 2, 3, 4].map((num, index) => (
             <div key={num} className="flex items-center flex-1 last:flex-none">
               <div className={`relative grid place-items-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold text-xs sm:text-sm transition-all duration-500 shrink-0 ${
@@ -94,11 +96,16 @@ export default function RejoindreEquipe() {
                   ? "bg-[#fd800a] text-white"
                   : "bg-white border-2 border-zinc-200 text-zinc-400"
               }`}>
-                {step > num ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" /> : num}
+                {step > num ? <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" /> : num}
               </div>
               {index < totalSteps - 1 && (
-                <div className="flex-1 h-0.5 mx-1.5 sm:mx-3 bg-zinc-200 relative overflow-hidden rounded-full">
-                  <div className={`absolute top-0 left-0 h-full bg-[#fd800a] transition-all duration-700 ease-out ${step > num ? "w-full" : "w-0"}`} />
+                <div className="relative mx-1.5 h-1 flex-1 overflow-hidden rounded-full bg-slate-200 sm:mx-3">
+                  <motion.div
+                    className="absolute left-0 top-0 h-full rounded-full bg-[#fd800a]"
+                    initial={false}
+                    animate={{ width: step > num ? "100%" : "0%" }}
+                    transition={{ duration: reducedMotion ? 0 : 0.45, ease: "easeInOut" }}
+                  />
                 </div>
               )}
             </div>
@@ -106,26 +113,48 @@ export default function RejoindreEquipe() {
         </div>
 
         {/* Carte du formulaire */}
-        <div className="w-full bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 sm:p-10">
+        <motion.div
+          initial={reducedMotion ? false : { opacity: 0, y: 24, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: reducedMotion ? 0 : 0.55, delay: reducedMotion ? 0 : 0.08 }}
+          className="w-full overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.09)]"
+        >
+          <div className="h-1.5 w-full bg-linear-to-r from-[#fd800a] via-[#FDBA74] to-[#fd800a]" />
+          <div className="p-6 sm:p-10">
           {!submitted ? (
             <form onSubmit={handleSubmit}>
               {/* Titre de l'étape avec icône */}
-              <div className="mb-8 flex items-center gap-4">
-                <div className="grid place-items-center w-12 h-12 rounded-xl bg-[#fd800a]/10 text-[#fd800a]">
+              <div className="mb-8 flex items-center gap-4 rounded-2xl bg-slate-50/80 p-4 sm:p-5">
+                <motion.div
+                  key={step}
+                  initial={reducedMotion ? false : { opacity: 0, scale: 0.85, rotate: -6 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.3 }}
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#fd800a]/10 text-[#fd800a] ring-1 ring-[#fd800a]/10"
+                >
                   {(() => {
                     const Icon = stepTitles[step - 1].icon;
                     return <Icon className="w-6 h-6" />;
                   })()}
-                </div>
+                </motion.div>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-[#111111]">{stepTitles[step - 1].title}</h2>
                   <p className="text-sm text-zinc-500 mt-0.5">{stepTitles[step - 1].subtitle}</p>
                 </div>
+                <span className="ml-auto hidden text-xs font-bold uppercase tracking-wider text-slate-400 sm:block">
+                  Étape {step} / {totalSteps}
+                </span>
               </div>
 
               {/* ÉTAPE 1 : Informations personnelles */}
               {step === 1 && (
-                <div className="space-y-5 animate-in fade-in duration-300">
+                <motion.div
+                  key="personal-info"
+                  initial={reducedMotion ? false : { opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.3 }}
+                  className="space-y-5"
+                >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-sm font-medium text-[#111111] mb-2">
@@ -181,12 +210,18 @@ export default function RejoindreEquipe() {
                         className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#fd800a] focus:ring-2 focus:ring-[#fd800a]/10 transition" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* ÉTAPE 2 : Profil professionnel */}
               {step === 2 && (
-                <div className="space-y-5 animate-in fade-in duration-300">
+                <motion.div
+                  key="professional-profile"
+                  initial={reducedMotion ? false : { opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.3 }}
+                  className="space-y-5"
+                >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-sm font-medium text-[#111111] mb-2">
@@ -204,7 +239,7 @@ export default function RejoindreEquipe() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-[#111111] mb-2">
-                        Niveau d'expérience <span className="text-red-500">*</span>
+                        Niveau d&apos;expérience <span className="text-red-500">*</span>
                       </label>
                       <select name="niveau" value={formData.niveau} onChange={handleChange}
                         className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#fd800a] focus:ring-2 focus:ring-[#fd800a]/10 transition cursor-pointer">
@@ -227,7 +262,7 @@ export default function RejoindreEquipe() {
 
                   <div>
                     <label className="block text-sm font-medium text-[#111111] mb-2">
-                      Domaine d'expertise / Compétences techniques <span className="text-red-500">*</span>
+                      Domaine d&apos;expertise / Compétences techniques <span className="text-red-500">*</span>
                     </label>
                     <select name="domaine" value={formData.domaine} onChange={handleChange}
                       className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#fd800a] focus:ring-2 focus:ring-[#fd800a]/10 transition cursor-pointer">
@@ -248,12 +283,18 @@ export default function RejoindreEquipe() {
                       placeholder="Ex : https://linkedin.com/in/votre-profil"
                       className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#fd800a] focus:ring-2 focus:ring-[#fd800a]/10 transition" />
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* ÉTAPE 3 : Motivation & engagement */}
               {step === 3 && (
-                <div className="space-y-5 animate-in fade-in duration-300">
+                <motion.div
+                  key="motivation"
+                  initial={reducedMotion ? false : { opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.3 }}
+                  className="space-y-5"
+                >
                   <div>
                     <label className="block text-sm font-medium text-[#111111] mb-2">
                       Pourquoi souhaitez-vous rejoindre Ghostech ? <span className="text-red-500">*</span>
@@ -315,17 +356,23 @@ export default function RejoindreEquipe() {
                       className="mt-0.5 w-4 h-4 accent-[#fd800a] cursor-pointer shrink-0"
                     />
                     <span className="text-xs text-zinc-600 leading-relaxed">
-                      J'accepte que mes données soient utilisées par Ghostech pour être contacté, intégrer les groupes de communication et recevoir la newsletter. <span className="text-red-500">*</span>
+                      J&apos;accepte que mes données soient utilisées par Ghostech pour être contacté, intégrer les groupes de communication et recevoir la newsletter. <span className="text-red-500">*</span>
                     </span>
                   </label>
-                </div>
+                </motion.div>
               )}
 
               {/* ÉTAPE 4 : Confirmation */}
               {step === 4 && (
-                <div className="space-y-5 animate-in fade-in duration-300">
+                <motion.div
+                  key="confirmation"
+                  initial={reducedMotion ? false : { opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.3 }}
+                  className="space-y-5"
+                >
                   <p className="text-sm text-zinc-500 mb-4">
-                    Vérifiez vos informations avant l'envoi de votre candidature.
+                    Vérifiez vos informations avant l&apos;envoi de votre candidature.
                   </p>
 
                   <div className="rounded-xl border border-zinc-200 divide-y divide-zinc-100 overflow-hidden">
@@ -360,30 +407,30 @@ export default function RejoindreEquipe() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Boutons Previous / Next avec validation */}
-              <div className="flex items-center justify-between pt-8 mt-8 border-t border-zinc-100">
+              <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
                 {step > 1 ? (
                   <button type="button" onClick={prevStep}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-zinc-200 bg-white text-sm font-medium text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition">
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fd800a]">
                     <ArrowLeft className="w-4 h-4" /> Précédent
                   </button>
                 ) : <div />}
 
                 {step < totalSteps ? (
                   <button type="button" onClick={nextStep} disabled={!isStepValid()}
-                    className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition shadow-md ${
+                    className={`inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-md hover:-translate-y-0.5 ${
                       isStepValid()
-                        ? "bg-[#fd800a] text-white hover:brightness-95 shadow-[#fd800a]/20 cursor-pointer"
+                        ? "bg-[#fd800a] text-white hover:brightness-95 shadow-[#fd800a]/20 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fd800a] focus-visible:ring-offset-2"
                         : "bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none"
                     }`}>
                     Suivant <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (
                   <button type="submit"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#fd800a] text-white text-sm font-semibold hover:brightness-95 transition shadow-md shadow-[#fd800a]/20 cursor-pointer">
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#fd800a] px-6 py-3 text-sm font-bold text-white shadow-md shadow-[#fd800a]/20 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fd800a] focus-visible:ring-offset-2">
                     Valider ma candidature 🚀
                   </button>
                 )}
@@ -391,21 +438,27 @@ export default function RejoindreEquipe() {
             </form>
           ) : (
             // ÉCRAN DE SUCCÈS
-            <div className="py-12 text-center space-y-4 animate-in fade-in">
-              <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center text-[#fd800a] mx-auto">
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: reducedMotion ? 0 : 0.35 }}
+              className="space-y-4 py-12 text-center"
+            >
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#fd800a]/10 text-[#fd800a] ring-8 ring-[#fd800a]/5">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h3 className="text-2xl font-bold text-[#111111]">Bienvenue dans la communauté !</h3>
               <p className="text-zinc-500 text-sm max-w-sm mx-auto leading-relaxed">
-                Félicitations <span className="font-semibold text-[#111111]">{formData.firstName}</span> ! Ton dossier a bien été transmis. L'équipe Ghostech va l'étudier avec attention.
+                Félicitations <span className="font-semibold text-[#111111]">{formData.firstName}</span> ! Ton dossier a bien été transmis. L&apos;équipe Ghostech va l&apos;étudier avec attention.
               </p>
               <button type="button" onClick={() => { setSubmitted(false); setStep(1); }}
                 className="text-xs text-[#fd800a] hover:underline font-semibold pt-4 block mx-auto">
                 Soumettre un autre profil
               </button>
-            </div>
+            </motion.div>
           )}
-        </div>
+          </div>
+        </motion.div>
 
       </div>
     </main>
